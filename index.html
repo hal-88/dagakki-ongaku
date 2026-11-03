@@ -53,11 +53,11 @@ body{
   font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans","Meiryo",sans-serif;
   -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
 }
-.wrap{max-width:1500px; margin:0 auto; padding:14px 16px 20px}
+.wrap{max-width:1500px; margin:0 auto; padding:8px 16px 10px}
 .title{
   display:inline-flex; align-items:center; flex-wrap:wrap; gap:6px;
-  background:var(--lime); padding:8px 16px; border-radius:6px;
-  font-size:clamp(15px,2vw,22px); font-weight:700; margin:0 0 10px;
+  background:var(--lime); padding:5px 14px; border-radius:6px;
+  font-size:clamp(14px,1.7vw,20px); font-weight:700; margin:0 0 6px;
 }
 .title .dot{width:.8em; height:.8em; border-radius:50%; background:var(--green); margin-right:4px}
 .title .pill{background:var(--green); color:#fff; border-radius:999px; padding:1px 14px; font-size:.85em}
@@ -67,7 +67,7 @@ body{
 .board{
   display:grid; width:max-content; margin:0 auto; position:relative;
   grid-template-columns:var(--inst-w) var(--sep) var(--cell) var(--sep) repeat(10,var(--cell)) var(--sep) var(--cell);
-  grid-template-rows:auto auto repeat(3, calc(var(--cell-h) + 22px));
+  grid-template-rows:auto auto repeat(3, calc(var(--cell-h) + 14px));
   column-gap:var(--gap);
 }
 .bar{
@@ -78,7 +78,7 @@ body{
 .bar.last{clip-path:none}
 .rule{
   grid-row:2; background:var(--lime); color:var(--lime-ink); font-weight:700;
-  font-size:calc(var(--cell)*.15); line-height:1.35; padding:4px 6px; margin:4px 0 6px; border-radius:4px;
+  font-size:calc(var(--cell)*.15); line-height:1.2; padding:3px 6px; margin:3px 0 4px; border-radius:4px;
   display:flex; align-items:center; justify-content:center; text-align:center;
 }
 .insthead{
@@ -122,33 +122,42 @@ body{
 .ghost{position:fixed; z-index:1000; pointer-events:none; box-shadow:0 10px 20px rgba(0,0,0,.28) !important}
 .lifting{opacity:.3}
 
-.hint{text-align:center; color:var(--muted); font-size:14px; margin:10px 0 0}
+/* 説明とリセットを1行に */
+.under{display:flex; align-items:center; gap:12px; margin-top:6px}
+.hint{flex:1; text-align:center; color:var(--muted); font-size:14px; margin:0}
 
-/* 下のパレット */
-.palette{display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; align-items:stretch}
-.box{background:var(--panel); border-radius:12px; padding:10px 10px 14px; flex:1 1 230px}
+/* 下のパレット（iPadの横画面で1列におさまるように） */
+.palette{display:flex; flex-wrap:wrap; gap:10px; margin-top:8px; align-items:stretch}
+.box{background:var(--panel); border-radius:12px; padding:8px 8px 10px; flex:1 1 calc(3*var(--pw) + 28px)}
 .box h2{
-  margin:0 0 10px; background:var(--green); color:#fff; font-size:15px; font-weight:700;
-  text-align:center; border-radius:6px; padding:5px 4px;
+  margin:0 0 6px; background:var(--green); color:#fff; font-size:14px; font-weight:700;
+  text-align:center; border-radius:6px; padding:3px 4px;
 }
-.items{display:flex; flex-wrap:wrap; gap:10px; justify-content:center}
-.box.cards{background:var(--cardpanel); flex:1.5 1 330px}
-.cardwrap{display:flex; flex-wrap:wrap; gap:14px; justify-content:center; align-items:flex-start}
-.cardgrid{display:grid; grid-template-columns:repeat(2,auto); gap:10px 16px}
-.cardrow{display:flex; align-items:center; gap:6px}
+.items{display:grid; grid-template-columns:repeat(3,var(--pw)); gap:6px; justify-content:center}
+/* パレットの楽器：上に楽器、下に名前 */
+.inst.pal{
+  flex-direction:column; width:var(--pw); height:var(--ph); gap:1px; padding:3px 2px;
+  font-size:calc((var(--pw) - 6px) / 7);
+}
+.inst.pal .ico{width:calc(var(--ph)*.58); height:calc(var(--ph)*.58)}
+.inst.pal span{line-height:1.1}
+.box.cards{background:var(--cardpanel); flex:1 1 100%}   /* カードは2段目に横1列 */
+.cardwrap{display:flex; flex-wrap:wrap; gap:10px 28px; justify-content:center; align-items:center}
+.cardgrid{display:grid; grid-template-columns:repeat(6,auto); gap:8px 12px}
+.cardrow{display:flex; align-items:center; gap:4px}
+.card.pal{width:var(--pc); height:calc(var(--pc)*.6)}
 .badge{
-  width:28px; height:28px; border-radius:50%; background:var(--b); color:#2b2b2b;
-  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px; flex:none;
+  width:24px; height:24px; border-radius:50%; background:var(--b); color:#2b2b2b;
+  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex:none;
 }
-.legend{font-size:14px; line-height:1; display:grid; gap:9px; padding-top:4px}
+.legend{font-size:12px; line-height:1; display:grid; grid-template-columns:repeat(2,auto); gap:6px 14px}
 .legend div{display:flex; align-items:center; gap:6px}
-.legend svg{width:40px; height:22px; flex:none}
-.legend b{font-weight:700}
+.legend svg{width:32px; height:18px; flex:none}
+.legend b{font-weight:700; grid-column:1 / -1}
 
-.footer{display:flex; justify-content:flex-end; margin-top:12px}
 #reset{
-  font:inherit; font-weight:700; font-size:18px; background:var(--btn); color:var(--btn-ink);
-  border:none; border-radius:8px; padding:10px 26px; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.2);
+  font:inherit; font-weight:700; font-size:15px; background:var(--btn); color:var(--btn-ink);
+  border:none; border-radius:8px; padding:6px 18px; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.2); flex:none;
 }
 #reset:focus-visible{outline:3px solid var(--green); outline-offset:2px}
 </style>
@@ -157,9 +166,11 @@ body{
 <main class="wrap">
   <h1 class="title"><span class="dot"></span>楽器とカードを動かして、自分たちの<span class="pill">打楽器の音楽</span>をつくりましょう。</h1>
   <div class="scroll"><div class="board" id="board"></div></div>
-  <p class="hint">下の楽器やカードを、指で表のマスまで動かそう。表の外に出すか、ダブルタップすると消えるよ。</p>
+  <div class="under">
+    <p class="hint">下の楽器やカードを、指で表のマスまで動かそう。表の外に出すか、ダブルタップすると消えるよ。</p>
+    <button id="reset" type="button">リセット</button>
+  </div>
   <section class="palette" id="palette"></section>
-  <div class="footer"><button id="reset" type="button">リセット</button></div>
 </main>
 
 <script>
@@ -235,17 +246,31 @@ let state = load();
 function getAt(p){ return p.kind === 'inst' ? state.inst[p.row] : state.cards[p.row][p.col]; }
 function setAt(p, v){ if (p.kind === 'inst') state.inst[p.row] = v; else state.cards[p.row][p.col] = v; }
 
-/* ---------- 大きさ（画面に合わせて1回だけ決める） ---------- */
-function fit(){
-  const avail = Math.min(window.innerWidth, 1500) - 36;
-  let cell = (avail - 15 * 4) / (2.1 + 12 + 0.45);
-  cell = Math.max(52, Math.min(cell, 96));
+/* ---------- 大きさ（画面に合わせて決める） ---------- */
+function setSize(cell){
   const st = document.documentElement.style;
   st.setProperty('--cell', cell + 'px');
   st.setProperty('--cell-h', Math.round(cell * 0.6) + 'px');
   st.setProperty('--inst-w', Math.round(cell * 2.1) + 'px');
   st.setProperty('--sep', Math.round(cell * 0.15) + 'px');
   st.setProperty('--gap', '4px');
+  // パレットの楽器：3つの箱が横いっぱいに並ぶ大きさ（大きくなりすぎないように表のマスに合わせる）
+  const w = Math.min(document.documentElement.clientWidth, 1500) - 32;
+  const pw = Math.floor(Math.min((w - 3 * 28 - 2 * 10) / 9, cell * 1.6));
+  st.setProperty('--pw', pw + 'px');
+  st.setProperty('--ph', Math.round(pw * 0.78) + 'px');
+  st.setProperty('--pc', Math.round(cell * 0.8) + 'px');    // パレットのカード
+}
+function fit(){
+  const d = document.documentElement;
+  const avail = Math.min(d.clientWidth, 1500) - 36;
+  let cell = Math.floor((avail - 15 * 4) / (2.1 + 12 + 0.45));
+  cell = Math.max(52, Math.min(cell, 96));
+  setSize(cell);
+  // 横向き（iPadの横画面など）では、スクロールしなくても全部見えるまで小さくする
+  if (window.innerWidth > window.innerHeight){
+    while (cell > 40 && (d.scrollHeight > d.clientHeight || d.scrollWidth > d.clientWidth)){ cell--; setSize(cell); }
+  }
 }
 
 /* ---------- 部品 ---------- */
@@ -327,6 +352,7 @@ function buildPalette(){
     g.items.forEach(n => {
       const item = {kind:'inst', id:g.cat + ':' + n};
       const chip = makeChip(item);
+      chip.classList.add('pal');
       chip.addEventListener('pointerdown', e => startDrag(e, item, null));
       items.appendChild(chip);
     });
@@ -342,6 +368,7 @@ function buildPalette(){
     const badge = div('badge'); badge.style.setProperty('--b', c.badge); badge.textContent = c.label;
     const item = {kind:'card', id:c.id};
     const chip = makeChip(item);
+    chip.classList.add('pal');
     chip.addEventListener('pointerdown', e => startDrag(e, item, null));
     row.append(badge, chip); grid.appendChild(row);
   });
@@ -428,10 +455,11 @@ document.getElementById('reset').addEventListener('click', () => {
   if (confirm('表をぜんぶ消して、はじめからにしますか？')){ state = blank(); save(); render(); }
 });
 
-fit();
 buildBoard();
 buildPalette();
 render();
+fit();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!drag) fit(); });
 window.addEventListener('resize', () => { if (!drag) fit(); });
 </script>
 </body>
