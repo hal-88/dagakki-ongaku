@@ -256,10 +256,10 @@ function setSize(cell){
   st.setProperty('--gap', '4px');
   // パレットの楽器：3つの箱が横いっぱいに並ぶ大きさ（大きくなりすぎないように表のマスに合わせる）
   const w = Math.min(document.documentElement.clientWidth, 1500) - 32;
-  const pw = Math.floor(Math.min((w - 3 * 28 - 2 * 10) / 9, cell * 1.6));
+  const pw = Math.floor(Math.min((w - 3 * 28 - 2 * 10) / 9 * 0.86, cell * 1.4));
   st.setProperty('--pw', pw + 'px');
   st.setProperty('--ph', Math.round(pw * 0.78) + 'px');
-  st.setProperty('--pc', Math.round(cell * 0.8) + 'px');    // パレットのカード
+  st.setProperty('--pc', Math.round(cell * 1.15) + 'px');   // パレットのカード（表のマスより少し大きく）
 }
 function fit(){
   const d = document.documentElement;
