@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>打楽器の音楽をつくろう</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fbfaf4; --ink:#2b2b2b; --muted:#7a7a7a;
+  --green:#3f9a4c; --green-pale:#dff1dc;
+  --lime:#eef3c6; --lime-ink:#4a7522;
+  --pink:#fde8df; --slot:rgba(255,255,255,.65); --slot-line:#e2a891;
+  --inst-bg:#e3f2ec; --inst-chip:#ffffff;
+  --card-bg:#ffffff; --card-line:#2b2b2b; --shape:#f2ad2c;
+  --panel:#eaf5ec; --cardpanel:#fdece4; --line:#9a9a9a;
+  --btn:#7fa9cf; --btn-ink:#ffffff;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1d201d; --ink:#ececec; --muted:#a8a8a8;
+    --green:#3f9a4c; --green-pale:#28402c;
+    --lime:#33401f; --lime-ink:#d5ea9d;
+    --pink:#3b2a24; --slot:rgba(0,0,0,.18); --slot-line:#9a6a58;
+    --inst-bg:#22362f; --inst-chip:#2c302c;
+    --card-bg:#ffffff; --card-line:#2b2b2b; --shape:#f2ad2c;
+    --panel:#232c25; --cardpanel:#33251f; --line:#777;
+    --btn:#4f7aa3; --btn-ink:#ffffff;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1d201d; --ink:#ececec; --muted:#a8a8a8;
+  --green:#3f9a4c; --green-pale:#28402c;
+  --lime:#33401f; --lime-ink:#d5ea9d;
+  --pink:#3b2a24; --slot:rgba(0,0,0,.18); --slot-line:#9a6a58;
+  --inst-bg:#22362f; --inst-chip:#2c302c;
+  --card-bg:#ffffff; --card-line:#2b2b2b; --shape:#f2ad2c;
+  --panel:#232c25; --cardpanel:#33251f; --line:#777;
+  --btn:#4f7aa3; --btn-ink:#ffffff;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans","Meiryo",sans-serif;
+  -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
+}
+.wrap{max-width:1500px; margin:0 auto; padding:14px 16px 20px}
+.title{
+  display:inline-flex; align-items:center; flex-wrap:wrap; gap:6px;
+  background:var(--lime); padding:8px 16px; border-radius:6px;
+  font-size:clamp(15px,2vw,22px); font-weight:700; margin:0 0 10px;
+}
+.title .dot{width:.8em; height:.8em; border-radius:50%; background:var(--green); margin-right:4px}
+.title .pill{background:var(--green); color:#fff; border-radius:999px; padding:1px 14px; font-size:.85em}
+.scroll{overflow-x:auto; padding-bottom:4px}
+
+/* 表 */
+.board{
+  display:grid; width:max-content; margin:0 auto; position:relative;
+  grid-template-columns:var(--inst-w) var(--sep) var(--cell) var(--sep) repeat(10,var(--cell)) var(--sep) var(--cell);
+  grid-template-rows:auto auto repeat(3, calc(var(--cell-h) + 22px));
+  column-gap:var(--gap);
+}
+.bar{
+  grid-row:1; background:var(--green); color:#fff; font-weight:700; text-align:center;
+  font-size:calc(var(--cell)*.2); padding:3px 0;
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,0 100%);
+}
+.bar.last{clip-path:none}
+.rule{
+  grid-row:2; background:var(--lime); color:var(--lime-ink); font-weight:700;
+  font-size:calc(var(--cell)*.15); line-height:1.35; padding:4px 6px; margin:4px 0 6px; border-radius:4px;
+  display:flex; align-items:center; justify-content:center; text-align:center;
+}
+.insthead{
+  grid-column:1; grid-row:1 / 3; background:var(--lime); color:var(--ink); font-weight:700;
+  font-size:calc(var(--cell)*.17); line-height:1.3; border-radius:4px; margin-bottom:6px;
+  display:flex; align-items:center; justify-content:center; text-align:center; padding:4px;
+}
+.panel{grid-row:3 / 6; border-radius:8px; background:var(--pink); z-index:0}
+.panel.inst{background:var(--inst-bg)}
+.rowline{grid-column:1 / -1; align-self:start; border-top:2px dotted var(--line); z-index:1; pointer-events:none}
+
+.slot{
+  position:relative; z-index:2; align-self:center; justify-self:center;
+  outline:2px dashed var(--slot-line); outline-offset:-2px; border-radius:6px; background:var(--slot);
+}
+.slot.card-slot{width:var(--cell); height:var(--cell-h)}
+.slot.inst-slot{
+  width:var(--inst-w); height:var(--cell-h);
+  display:flex; align-items:center; justify-content:center; text-align:center;
+  color:var(--muted); font-size:calc(var(--cell)*.15); line-height:1.3;
+}
+.slot.over{outline:3px solid var(--green); outline-offset:-3px; background:var(--green-pale)}
+.slot > .chip{position:absolute; inset:0; box-shadow:none}
+
+/* 楽器・カード（大きさは固定） */
+.chip{touch-action:none; cursor:grab; flex:none}
+.inst{
+  width:var(--inst-w); height:var(--cell-h); border-radius:8px;
+  background:var(--inst-chip); color:var(--ink); border:2px solid var(--c);
+  display:flex; align-items:center; justify-content:center; gap:5px;
+  font-weight:700; font-size:calc(var(--cell)*.18); white-space:nowrap; padding:0 6px 0 4px;
+  box-shadow:0 2px 0 var(--c);
+}
+.inst .ico{width:calc(var(--cell-h) - 8px); height:calc(var(--cell-h) - 8px); flex:none}
+.card{
+  width:var(--cell); height:var(--cell-h); background:var(--card-bg);
+  border:2px solid var(--card-line); border-radius:6px; box-shadow:0 2px 0 var(--card-line);
+}
+.card svg{width:100%; height:100%; display:block}
+.shape{fill:var(--shape)}
+.ghost{position:fixed; z-index:1000; pointer-events:none; box-shadow:0 10px 20px rgba(0,0,0,.28) !important}
+.lifting{opacity:.3}
+
+.hint{text-align:center; color:var(--muted); font-size:14px; margin:10px 0 0}
+
+/* 下のパレット */
+.palette{display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; align-items:stretch}
+.box{background:var(--panel); border-radius:12px; padding:10px 10px 14px; flex:1 1 230px}
+.box h2{
+  margin:0 0 10px; background:var(--green); color:#fff; font-size:15px; font-weight:700;
+  text-align:center; border-radius:6px; padding:5px 4px;
+}
+.items{display:flex; flex-wrap:wrap; gap:10px; justify-content:center}
+.box.cards{background:var(--cardpanel); flex:1.5 1 330px}
+.cardwrap{display:flex; flex-wrap:wrap; gap:14px; justify-content:center; align-items:flex-start}
+.cardgrid{display:grid; grid-template-columns:repeat(2,auto); gap:10px 16px}
+.cardrow{display:flex; align-items:center; gap:6px}
+.badge{
+  width:28px; height:28px; border-radius:50%; background:var(--b); color:#2b2b2b;
+  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px; flex:none;
+}
+.legend{font-size:14px; line-height:1; display:grid; gap:9px; padding-top:4px}
+.legend div{display:flex; align-items:center; gap:6px}
+.legend svg{width:40px; height:22px; flex:none}
+.legend b{font-weight:700}
+
+.footer{display:flex; justify-content:flex-end; margin-top:12px}
+#reset{
+  font:inherit; font-weight:700; font-size:18px; background:var(--btn); color:var(--btn-ink);
+  border:none; border-radius:8px; padding:10px 26px; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.2);
+}
+#reset:focus-visible{outline:3px solid var(--green); outline-offset:2px}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1 class="title"><span class="dot"></span>楽器とカードを動かして、自分たちの<span class="pill">打楽器の音楽</span>をつくりましょう。</h1>
+  <div class="scroll"><div class="board" id="board"></div></div>
+  <p class="hint">下の楽器やカードを、指で表のマスまで動かそう。表の外に出すか、ダブルタップすると消えるよ。</p>
+  <section class="palette" id="palette"></section>
+  <div class="footer"><button id="reset" type="button">リセット</button></div>
+</main>
+
+<script>
+const KEY = 'dagakki-ongaku-v1';
+const ROWS = 3, COLS = 12;   // 始め1・中10・終わり1
+
+const INST = [
+  {cat:'kawa',    name:'皮がはってある楽器', color:'#d0782a', items:['ボンゴ','タンブリン','コンガ','フレームドラム','小だいこ']},
+  {cat:'kinzoku', name:'金属でできている楽器', color:'#5b80a8', items:['トライアングル','すず','トーンチャイム','シンバル','鉄琴']},
+  {cat:'ki',      name:'木でできている楽器',  color:'#8b5a2b', items:['カスタネット','クラベス','ウッドブロック','マラカス','ギロ','木琴']},
+];
+const C = (cx, r) => `<circle class="shape" cx="${cx}" cy="30" r="${r}"/>`;
+const S = 6.5, B = 12;   // 小さい○・大きい○
+const CARDS = [
+  {id:'a', label:'ア', badge:'#f6b3c2', svg: C(14,S)+C(31,S)+C(56,B)+C(83,B)},
+  {id:'i', label:'イ', badge:'#a9d4f2', svg: C(17,B)+C(44,B)+C(69,S)+C(86,S)},
+  {id:'u', label:'ウ', badge:'#f7e08a', svg: '<path class="shape" d="M6 30 C40 28 70 22 94 7 L94 53 C70 38 40 32 6 30 Z"/>'},
+  {id:'e', label:'エ', badge:'#b7e0b0', svg: '<path class="shape" d="M94 30 C60 28 30 22 6 7 L6 53 C30 38 60 32 94 30 Z"/>'},
+  {id:'o', label:'オ', badge:'#d4c2f0', svg: C(17,B)+C(41,S)+C(63,B)+C(87,S)},
+  {id:'ka',label:'カ', badge:'#f9c79a', svg: C(13,S)+C(37,B)+C(59,S)+C(83,B)},
+];
+const INST_BY_ID = {}, CARD_BY_ID = {};
+INST.forEach(g => g.items.forEach(n => INST_BY_ID[g.cat + ':' + n] = {name:n, color:g.color}));
+CARDS.forEach(c => CARD_BY_ID[c.id] = c);
+
+/* ---------- 楽器のイラスト ---------- */
+function bars(fill, stroke){
+  let s = '';
+  for (let i = 0; i < 7; i++){
+    const h = 24 - i * 2.4, x = 4 + i * 4.8;
+    s += `<rect x="${x}" y="${18 - h / 2}" width="3.8" height="${h}" rx="1" fill="${fill}" stroke="${stroke}" stroke-width=".8"/>`;
+  }
+  return s + '<line x1="3" y1="32" x2="37" y2="27" stroke="#444" stroke-width="1.6"/><path d="M6 32 v6 M34 27 v10" stroke="#444" stroke-width="1.4" fill="none"/>';
+}
+const ICONS = {
+  'ボンゴ': '<g stroke="#7a4a1c" stroke-width="1.2"><path d="M4 15 h13 l-2 17 h-9 z" fill="#e9b26a"/><ellipse cx="10.5" cy="15" rx="6.5" ry="2.5" fill="#f6e7c8"/><path d="M20 12 h16 l-2 20 h-12 z" fill="#e9b26a"/><ellipse cx="28" cy="12" rx="8" ry="2.8" fill="#f6e7c8"/></g><rect x="16" y="21" width="5" height="4" fill="#7a4a1c"/>',
+  'タンブリン': '<circle cx="20" cy="20" r="14" fill="#f6e7c8" stroke="#a8723a" stroke-width="3.5"/>' + [[20,6],[34,20],[20,34],[6,20],[30,10],[30,30],[10,30],[10,10]].map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="2.4" fill="#d6d6d6" stroke="#777" stroke-width=".8"/>`).join(''),
+  'コンガ': '<path d="M15 30 l-4 8 M25 30 l4 8 M20 30 v8" stroke="#333" stroke-width="1.5"/><path d="M13 6 h14 q5 11 0 24 h-14 q-5 -13 0 -24z" fill="#f08a24" stroke="#7a3a10" stroke-width="1.2"/><ellipse cx="20" cy="6" rx="7" ry="2.2" fill="#f6e7c8" stroke="#7a3a10" stroke-width="1"/>',
+  'フレームドラム': '<circle cx="18" cy="18" r="14" fill="#fbf6ea" stroke="#e0b030" stroke-width="3"/><line x1="25" y1="34" x2="38" y2="30" stroke="#a0703a" stroke-width="1.8"/><circle cx="25" cy="34" r="2.4" fill="#f2d7a8" stroke="#a0703a" stroke-width=".8"/>',
+  '小だいこ': '<path d="M6 17 v11 a14 4 0 0 0 28 0 v-11" fill="#c9ced6" stroke="#555" stroke-width="1.2"/><ellipse cx="20" cy="17" rx="14" ry="4" fill="#f4f4f4" stroke="#555" stroke-width="1.2"/><line x1="7" y1="5" x2="21" y2="14" stroke="#c89a5a" stroke-width="2.2" stroke-linecap="round"/><line x1="33" y1="4" x2="19" y2="13" stroke="#c89a5a" stroke-width="2.2" stroke-linecap="round"/>',
+  'トライアングル': '<line x1="20" y1="1" x2="20" y2="6" stroke="#c33" stroke-width="1.5"/><path d="M18 9 L20 6 L34 34 L6 34 L16 13" fill="none" stroke="#9aa3ad" stroke-width="2.6" stroke-linejoin="round"/><line x1="25" y1="24" x2="37" y2="10" stroke="#555" stroke-width="1.6" stroke-linecap="round"/>',
+  'すず': '<path d="M7 25 a13 11 0 0 1 26 0" fill="none" stroke="#2d8fd5" stroke-width="5" stroke-linecap="round"/>' + [[7,28],[12,17],[20,14],[28,17],[33,28]].map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="3.4" fill="#e2e2e2" stroke="#888" stroke-width=".9"/>`).join(''),
+  'トーンチャイム': '<rect x="16.5" y="10" width="7" height="28" rx="3.5" fill="#dfe3e8" stroke="#8a929c" stroke-width="1.2"/><line x1="18.5" y1="13" x2="18.5" y2="35" stroke="#ffffff" stroke-width="1.2"/><rect x="15" y="3" width="10" height="8" rx="2" fill="#555"/>',
+  'シンバル': '<path d="M20 20 v16 M12 38 l8 -4 l8 4" stroke="#444" stroke-width="1.6" fill="none"/><ellipse cx="20" cy="18" rx="17" ry="5" fill="#e3c26a" stroke="#a8862e" stroke-width="1"/><ellipse cx="20" cy="16" rx="3.5" ry="1.8" fill="#c9a24a"/>',
+  '鉄琴': bars('#d9dde3', '#7f8892'),
+  'カスタネット': '<path d="M20 12 q-5 -9 -13 -6" stroke="#c33" fill="none" stroke-width="1.5"/><path d="M6 22 a14 10 0 0 1 28 0 z" fill="#2c64b8" stroke="#1d3f78" stroke-width="1"/><path d="M6 24 a14 10 0 0 0 28 0 z" fill="#d23a3a" stroke="#8a1f1f" stroke-width="1"/>',
+  'クラベス': '<line x1="7" y1="33" x2="31" y2="7" stroke="#5a2f1c" stroke-width="5" stroke-linecap="round"/><line x1="11" y1="9" x2="34" y2="33" stroke="#7a4428" stroke-width="5" stroke-linecap="round"/>',
+  'ウッドブロック': '<line x1="19" y1="21" x2="19" y2="36" stroke="#8a5a2b" stroke-width="3" stroke-linecap="round"/><rect x="5" y="11" width="28" height="10" rx="4" fill="#d9a066" stroke="#8a5a2b" stroke-width="1.2"/><line x1="11" y1="16" x2="16" y2="16" stroke="#8a5a2b" stroke-width="1.4"/><line x1="22" y1="16" x2="27" y2="16" stroke="#8a5a2b" stroke-width="1.4"/><line x1="28" y1="24" x2="36" y2="37" stroke="#d9a066" stroke-width="2.6" stroke-linecap="round"/>',
+  'マラカス': '<line x1="13" y1="18" x2="10" y2="37" stroke="#e8c27a" stroke-width="3.2" stroke-linecap="round"/><line x1="27" y1="18" x2="30" y2="37" stroke="#e8c27a" stroke-width="3.2" stroke-linecap="round"/><circle cx="13" cy="12" r="7.5" fill="#e5463c"/><circle cx="27" cy="12" r="7.5" fill="#e5463c"/><circle cx="11" cy="10" r="1.5" fill="#ffd84a"/><circle cx="25" cy="10" r="1.5" fill="#ffd84a"/>',
+  'ギロ': '<g transform="rotate(-35 18 20)"><ellipse cx="18" cy="20" rx="16" ry="6.5" fill="#e6b45a" stroke="#8a5a2b" stroke-width="1.2"/>' + [8,11,14,17,20,23,26,29].map(x => `<line x1="${x}" y1="15" x2="${x}" y2="25" stroke="#8a5a2b" stroke-width=".9"/>`).join('') + '</g><line x1="29" y1="26" x2="37" y2="38" stroke="#8a5a2b" stroke-width="1.6" stroke-linecap="round"/>',
+  '木琴': bars('#b8743f', '#6e3f1c'),
+};
+
+/* ---------- 状態 ---------- */
+function blank(){ return {inst:Array(ROWS).fill(null), cards:Array.from({length:ROWS}, () => Array(COLS).fill(null))}; }
+function valid(it){ return it && ((it.kind === 'inst' && INST_BY_ID[it.id]) || (it.kind === 'card' && CARD_BY_ID[it.id])) ? it : null; }
+function load(){
+  try{
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if (s && s.inst && s.cards){
+      const b = blank();
+      for (let r = 0; r < ROWS; r++){
+        b.inst[r] = valid(s.inst[r]);
+        for (let c = 0; c < COLS; c++) b.cards[r][c] = valid(s.cards[r] && s.cards[r][c]);
+      }
+      return b;
+    }
+  }catch(e){}
+  return blank();
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+let state = load();
+function getAt(p){ return p.kind === 'inst' ? state.inst[p.row] : state.cards[p.row][p.col]; }
+function setAt(p, v){ if (p.kind === 'inst') state.inst[p.row] = v; else state.cards[p.row][p.col] = v; }
+
+/* ---------- 大きさ（画面に合わせて1回だけ決める） ---------- */
+function fit(){
+  const avail = Math.min(window.innerWidth, 1500) - 36;
+  let cell = (avail - 15 * 4) / (2.1 + 12 + 0.45);
+  cell = Math.max(52, Math.min(cell, 96));
+  const st = document.documentElement.style;
+  st.setProperty('--cell', cell + 'px');
+  st.setProperty('--cell-h', Math.round(cell * 0.6) + 'px');
+  st.setProperty('--inst-w', Math.round(cell * 2.1) + 'px');
+  st.setProperty('--sep', Math.round(cell * 0.15) + 'px');
+  st.setProperty('--gap', '4px');
+}
+
+/* ---------- 部品 ---------- */
+function makeChip(item){
+  const el = document.createElement('div');
+  if (item.kind === 'inst'){
+    const d = INST_BY_ID[item.id];
+    el.className = 'chip inst';
+    el.style.setProperty('--c', d.color);
+    el.innerHTML = '<svg class="ico" viewBox="0 0 40 40" aria-hidden="true">' + (ICONS[d.name] || '') + '</svg><span>' + d.name + '</span>';
+  } else {
+    el.className = 'chip card';
+    el.innerHTML = `<svg viewBox="0 0 100 60" aria-label="${CARD_BY_ID[item.id].label}のカード">${CARD_BY_ID[item.id].svg}</svg>`;
+  }
+  return el;
+}
+function div(cls, css){ const d = document.createElement('div'); d.className = cls; if (css) d.style.cssText = css; return d; }
+
+/* ---------- 表をつくる ---------- */
+const board = document.getElementById('board');
+const slots = [];
+function buildBoard(){
+  const h = div('insthead'); h.innerHTML = 'えんそう<br>する楽器'; board.appendChild(h);
+  const heads = [
+    {t:'始め', col:'3', rule:'カードを<br>1まい<br>3人<br>いっしょに'},
+    {t:'中', col:'5 / 15', rule:'カードを自由に組み合わせる。'},
+    {t:'終わり', col:'16', rule:'カードを<br>1まい<br>3人<br>いっしょに', last:true},
+  ];
+  heads.forEach(x => {
+    const b = div('bar' + (x.last ? ' last' : ''), `grid-column:${x.col}`); b.textContent = x.t; board.appendChild(b);
+    const r = div('rule', `grid-column:${x.col}`); r.innerHTML = x.rule; board.appendChild(r);
+  });
+  board.appendChild(div('panel inst', 'grid-column:1'));
+  board.appendChild(div('panel', 'grid-column:3'));
+  board.appendChild(div('panel', 'grid-column:5 / 15'));
+  board.appendChild(div('panel', 'grid-column:16'));
+  ['4', '5'].forEach(row => {
+    board.appendChild(div('rowline', `grid-row:${row}; grid-column:1 / 3`));
+    board.appendChild(div('rowline', `grid-row:${row}; grid-column:4 / 16`));
+  });
+
+  for (let r = 0; r < ROWS; r++){
+    const s = div('slot inst-slot', `grid-column:1; grid-row:${3 + r}`);
+    Object.assign(s.dataset, {kind:'inst', row:r, col:0});
+    board.appendChild(s); slots.push(s);
+    for (let c = 0; c < COLS; c++){
+      const shared = c === 0 || c === 11;   // 始め・終わりは3人で1まい
+      if (shared && r > 0) continue;
+      const col = c === 0 ? 3 : c === 11 ? 16 : 4 + c;
+      const cs = div('slot card-slot', `grid-column:${col}; grid-row:${shared ? '3 / 6' : 3 + r}`);
+      Object.assign(cs.dataset, {kind:'card', row:r, col:c});
+      board.appendChild(cs); slots.push(cs);
+    }
+  }
+}
+
+function render(){
+  slots.forEach(s => {
+    const p = {kind:s.dataset.kind, row:+s.dataset.row, col:+s.dataset.col};
+    const item = getAt(p);
+    s.innerHTML = '';
+    if (item){
+      const chip = makeChip(item);
+      chip.addEventListener('pointerdown', e => startDrag(e, item, p));
+      s.appendChild(chip);
+    } else if (p.kind === 'inst'){
+      s.innerHTML = `${p.row + 1}人めの<br>楽器`;
+    }
+  });
+}
+
+/* ---------- 下のパレット ---------- */
+function buildPalette(){
+  const pal = document.getElementById('palette');
+  INST.forEach(g => {
+    const box = div('box');
+    box.innerHTML = `<h2>${g.name}</h2>`;
+    const items = div('items');
+    g.items.forEach(n => {
+      const item = {kind:'inst', id:g.cat + ':' + n};
+      const chip = makeChip(item);
+      chip.addEventListener('pointerdown', e => startDrag(e, item, null));
+      items.appendChild(chip);
+    });
+    box.appendChild(items); pal.appendChild(box);
+  });
+
+  const box = div('box cards');
+  box.innerHTML = '<h2>カード</h2>';
+  const wrap = div('cardwrap');
+  const grid = div('cardgrid');
+  CARDS.forEach(c => {
+    const row = div('cardrow');
+    const badge = div('badge'); badge.style.setProperty('--b', c.badge); badge.textContent = c.label;
+    const item = {kind:'card', id:c.id};
+    const chip = makeChip(item);
+    chip.addEventListener('pointerdown', e => startDrag(e, item, null));
+    row.append(badge, chip); grid.appendChild(row);
+  });
+  const legend = div('legend');
+  legend.innerHTML = `
+    <b>図形の意味</b>
+    <div><svg viewBox="0 0 40 22"><circle class="shape" cx="20" cy="11" r="4.5"/></svg>弱い音</div>
+    <div><svg viewBox="0 0 40 22"><circle class="shape" cx="20" cy="11" r="9"/></svg>強い音</div>
+    <div><svg viewBox="0 0 40 22"><path class="shape" d="M3 11 L37 2 L37 20 Z"/></svg>だんだん強く</div>
+    <div><svg viewBox="0 0 40 22"><path class="shape" d="M37 11 L3 2 L3 20 Z"/></svg>だんだん弱く</div>`;
+  wrap.append(grid, legend); box.appendChild(wrap); pal.appendChild(box);
+}
+
+/* ---------- ドラッグ ---------- */
+let drag = null, lastTap = null;
+function startDrag(e, item, from){
+  if (drag || (e.button !== undefined && e.button !== 0)) return;
+  e.preventDefault();
+  const src = e.currentTarget, r = src.getBoundingClientRect();
+  const g = makeChip(item); g.classList.add('ghost');
+  g.style.left = r.left + 'px'; g.style.top = r.top + 'px';
+  document.body.appendChild(g);
+  if (from) src.classList.add('lifting');
+  drag = {item, from, g, src, dx:e.clientX - r.left, dy:e.clientY - r.top, sx:e.clientX, sy:e.clientY, id:e.pointerId, over:null};
+  window.addEventListener('pointermove', onMove, {passive:false});
+  window.addEventListener('pointerup', onUp);
+  window.addEventListener('pointercancel', onCancel);
+}
+function slotAt(x, y){
+  const el = document.elementFromPoint(x, y);
+  const s = el && el.closest('.slot');
+  return s && s.dataset.kind === drag.item.kind ? s : null;
+}
+function onMove(e){
+  if (!drag || e.pointerId !== drag.id) return;
+  e.preventDefault();
+  drag.g.style.left = (e.clientX - drag.dx) + 'px';
+  drag.g.style.top  = (e.clientY - drag.dy) + 'px';
+  const s = slotAt(e.clientX, e.clientY);
+  if (s !== drag.over){
+    if (drag.over) drag.over.classList.remove('over');
+    if (s) s.classList.add('over');
+    drag.over = s;
+  }
+}
+function finish(e, commit){
+  window.removeEventListener('pointermove', onMove);
+  window.removeEventListener('pointerup', onUp);
+  window.removeEventListener('pointercancel', onCancel);
+  if (drag.over) drag.over.classList.remove('over');
+  drag.g.remove(); drag.src.classList.remove('lifting');
+  if (commit){
+    const {item, from} = drag;
+    const moved = Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8;
+    if (from && !moved){
+      // 表の中のものをダブルタップしたら消す
+      const key = from.kind + from.row + '-' + from.col, now = Date.now();
+      if (lastTap && lastTap.key === key && now - lastTap.t < 400){
+        setAt(from, null); lastTap = null; save();
+      } else {
+        lastTap = {key, t:now};
+      }
+    } else {
+      const s = slotAt(e.clientX, e.clientY);
+      if (s){
+        const to = {kind:s.dataset.kind, row:+s.dataset.row, col:+s.dataset.col};
+        if (from) setAt(from, null);
+        setAt(to, item);
+      } else if (from){
+        setAt(from, null);   // 表の外に出したら消す
+      }
+      lastTap = null;
+      save();
+    }
+  }
+  drag = null;
+  render();
+}
+function onUp(e){ if (drag && e.pointerId === drag.id) finish(e, true); }
+function onCancel(e){ if (drag && e.pointerId === drag.id) finish(e, false); }
+
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.getElementById('reset').addEventListener('click', () => {
+  if (confirm('表をぜんぶ消して、はじめからにしますか？')){ state = blank(); save(); render(); }
+});
+
+fit();
+buildBoard();
+buildPalette();
+render();
+window.addEventListener('resize', () => { if (!drag) fit(); });
+</script>
+</body>
+</html>
