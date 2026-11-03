@@ -179,8 +179,8 @@ const ROWS = 3, COLS = 12;   // 始め1・中10・終わり1
 
 const INST = [
   {cat:'kawa',    name:'皮がはってある楽器', color:'#d0782a', items:['ボンゴ','タンブリン','コンガ','フレームドラム','小だいこ']},
-  {cat:'kinzoku', name:'金ぞくでできている楽器', color:'#5b80a8', items:['トライアングル','すず','トーンチャイム','シンバル','鉄きん']},
-  {cat:'ki',      name:'木でできている楽器',  color:'#8b5a2b', items:['カスタネット','クラベス','ウッドブロック','マラカス','ギロ','木きん']},
+  {cat:'kinzoku', name:'金属でできている楽器', color:'#5b80a8', items:['トライアングル','すず','トーンチャイム','シンバル','鉄琴']},
+  {cat:'ki',      name:'木でできている楽器',  color:'#8b5a2b', items:['カスタネット','クラベス','ウッドブロック','マラカス','ギロ','木琴']},
 ];
 const C = (cx, r) => `<circle class="shape" cx="${cx}" cy="30" r="${r}"/>`;
 const S = 6.5, B = 12;   // 小さい○・大きい○
@@ -215,18 +215,18 @@ const ICONS = {
   'すず': '<path d="M7 25 a13 11 0 0 1 26 0" fill="none" stroke="#2d8fd5" stroke-width="5" stroke-linecap="round"/>' + [[7,28],[12,17],[20,14],[28,17],[33,28]].map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="3.4" fill="#e2e2e2" stroke="#888" stroke-width=".9"/>`).join(''),
   'トーンチャイム': '<rect x="16.5" y="10" width="7" height="28" rx="3.5" fill="#dfe3e8" stroke="#8a929c" stroke-width="1.2"/><line x1="18.5" y1="13" x2="18.5" y2="35" stroke="#ffffff" stroke-width="1.2"/><rect x="15" y="3" width="10" height="8" rx="2" fill="#555"/>',
   'シンバル': '<path d="M20 20 v16 M12 38 l8 -4 l8 4" stroke="#444" stroke-width="1.6" fill="none"/><ellipse cx="20" cy="18" rx="17" ry="5" fill="#e3c26a" stroke="#a8862e" stroke-width="1"/><ellipse cx="20" cy="16" rx="3.5" ry="1.8" fill="#c9a24a"/>',
-  '鉄きん': bars('#d9dde3', '#7f8892'),
+  '鉄琴': bars('#d9dde3', '#7f8892'),
   'カスタネット': '<path d="M20 12 q-5 -9 -13 -6" stroke="#c33" fill="none" stroke-width="1.5"/><path d="M6 22 a14 10 0 0 1 28 0 z" fill="#2c64b8" stroke="#1d3f78" stroke-width="1"/><path d="M6 24 a14 10 0 0 0 28 0 z" fill="#d23a3a" stroke="#8a1f1f" stroke-width="1"/>',
   'クラベス': '<line x1="7" y1="33" x2="31" y2="7" stroke="#5a2f1c" stroke-width="5" stroke-linecap="round"/><line x1="11" y1="9" x2="34" y2="33" stroke="#7a4428" stroke-width="5" stroke-linecap="round"/>',
   'ウッドブロック': '<line x1="19" y1="21" x2="19" y2="36" stroke="#8a5a2b" stroke-width="3" stroke-linecap="round"/><rect x="5" y="11" width="28" height="10" rx="4" fill="#d9a066" stroke="#8a5a2b" stroke-width="1.2"/><line x1="11" y1="16" x2="16" y2="16" stroke="#8a5a2b" stroke-width="1.4"/><line x1="22" y1="16" x2="27" y2="16" stroke="#8a5a2b" stroke-width="1.4"/><line x1="28" y1="24" x2="36" y2="37" stroke="#d9a066" stroke-width="2.6" stroke-linecap="round"/>',
   'マラカス': '<line x1="13" y1="18" x2="10" y2="37" stroke="#e8c27a" stroke-width="3.2" stroke-linecap="round"/><line x1="27" y1="18" x2="30" y2="37" stroke="#e8c27a" stroke-width="3.2" stroke-linecap="round"/><circle cx="13" cy="12" r="7.5" fill="#e5463c"/><circle cx="27" cy="12" r="7.5" fill="#e5463c"/><circle cx="11" cy="10" r="1.5" fill="#ffd84a"/><circle cx="25" cy="10" r="1.5" fill="#ffd84a"/>',
   'ギロ': '<g transform="rotate(-35 18 20)"><ellipse cx="18" cy="20" rx="16" ry="6.5" fill="#e6b45a" stroke="#8a5a2b" stroke-width="1.2"/>' + [8,11,14,17,20,23,26,29].map(x => `<line x1="${x}" y1="15" x2="${x}" y2="25" stroke="#8a5a2b" stroke-width=".9"/>`).join('') + '</g><line x1="29" y1="26" x2="37" y2="38" stroke="#8a5a2b" stroke-width="1.6" stroke-linecap="round"/>',
-  '木きん': bars('#b8743f', '#6e3f1c'),
+  '木琴': bars('#b8743f', '#6e3f1c'),
 };
 
 /* ---------- 状態 ---------- */
 function blank(){ return {inst:Array(ROWS).fill(null), cards:Array.from({length:ROWS}, () => Array(COLS).fill(null))}; }
-const RENAMED = {'kinzoku:鉄琴':'kinzoku:鉄きん', 'ki:木琴':'ki:木きん'};   // 前の名前で保存された表も読めるように
+const RENAMED = {'kinzoku:鉄きん':'kinzoku:鉄琴', 'ki:木きん':'ki:木琴'};   // 一時的に使った名前で保存された表も読めるように
 function valid(it){
   if (it && it.kind === 'inst' && RENAMED[it.id]) it = {kind:'inst', id:RENAMED[it.id]};
   return it && ((it.kind === 'inst' && INST_BY_ID[it.id]) || (it.kind === 'card' && CARD_BY_ID[it.id])) ? it : null;
